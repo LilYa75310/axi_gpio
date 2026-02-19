@@ -86,8 +86,12 @@ module axi_gpio #(
   assign READ_ADDR_O = read_addr;
   
   // internal signals
+  logic aw_done;
+  logic w_done;
+  logic aw_shake;
   logic w_shake;
   
+  assign aw_shake = S_AXI_AWVALID_I && axi_awready;
   assign w_shake = S_AXI_WVALID_I && axi_wready;
 
   // ======================================
@@ -131,14 +135,26 @@ module axi_gpio #(
   // B response
   always_ff @(posedge S_AXI_ACLK or negedge S_AXI_ARESETN) begin : B_response
     if(!S_AXI_ARESETN) begin
+      aw_done <= 1'b0;
+      w_done <= 1'b0;
       axi_bvalid <= 1'b0;
       axi_bresp <= 2'b00;
     end else begin
-      if(w_shake && !axi_bvalid) begin
+      if(aw_shake) begin
+        aw_done <= 1'b1;
+      end
+
+      if(w_shake) begin
+        w_done <= 1'b1;
+      end
+
+      if((aw_done || aw_shake) && (w_done || w_shake) && !axi_bvalid) begin
         axi_bvalid <= 1'b1;
         axi_bresp <= 2'b00;
       end else if(axi_bvalid && S_AXI_BREADY_I) begin
         axi_bvalid <= 1'b0;
+        aw_done <= 1'b0;
+        w_done <= 1'b0;
       end
     end
   end
