@@ -8,35 +8,35 @@ module axi_gpio_top #(
   // ======================================
   // AXI-Lite Interface
   // ======================================
-  input  wire                         s_axi_aclk_i,
-  input  wire                         s_axi_areset_n,
+  input  wire                         s_axi_aclk,
+  input  wire                         s_axi_aresetn,
 
   // Write address channel
-  input  wire [AXI_ADDR_WIDTH-1:0]    s_axi_awaddr_i,
-  input  wire                         s_axi_awvalid_i,
-  output wire                         s_axi_awready_o,
+  input  wire [AXI_ADDR_WIDTH-1:0]    s_axi_awaddr,
+  input  wire                         s_axi_awvalid,
+  output wire                         s_axi_awready,
 
   // Write data channel
-  input  wire [AXI_DATA_WIDTH-1:0]    s_axi_wdata_i,
-  input  wire [AXI_DATA_WIDTH/8-1:0]  s_axi_wstb_i,
-  input  wire                         s_axi_wvalid_i,
-  output wire                         s_axi_wready_o,
+  input  wire [AXI_DATA_WIDTH-1:0]    s_axi_wdata,
+  input  wire [AXI_DATA_WIDTH/8-1:0]  s_axi_wstrb,
+  input  wire                         s_axi_wvalid,
+  output wire                         s_axi_wready,
 
   // Write response channel
-  output wire [1:0]                   s_axi_bresp_o,
-  output wire                         s_axi_bvalid_o,
-  input  wire                         s_axi_bready_i,
+  output wire [1:0]                   s_axi_bresp,
+  output wire                         s_axi_bvalid,
+  input  wire                         s_axi_bready,
 
   // Read address channel
-  input  wire [AXI_ADDR_WIDTH-1:0]    s_axi_araddr_i,
-  input  wire                         s_axi_arvalid_i,
-  output wire                         s_axi_arready_o,
+  input  wire [AXI_ADDR_WIDTH-1:0]    s_axi_araddr,
+  input  wire                         s_axi_arvalid,
+  output wire                         s_axi_arready,
 
   // Read data channel
-  output wire [AXI_DATA_WIDTH-1:0]    s_axi_rdata_o,
-  output wire [1:0]                   s_axi_rresp_o,
-  output wire                         s_axi_rvalid_o,
-  input  wire                         s_axi_rready_i,
+  output wire [AXI_DATA_WIDTH-1:0]    s_axi_rdata,
+  output wire [1:0]                   s_axi_rresp,
+  output wire                         s_axi_rvalid,
+  input  wire                         s_axi_rready,
 
   // ======================================
   // GPIO pins
@@ -71,30 +71,30 @@ module axi_gpio_top #(
     .GPIO_WIDTH     (GPIO_WIDTH)
   ) u_axi_gpio (
     // AXI
-    .s_axi_aclk_i     (s_axi_aclk_i),
-    .s_axi_areset_n   (s_axi_areset_n),
+    .s_axi_aclk_i     (s_axi_aclk),
+    .s_axi_areset_n   (s_axi_aresetn),
 
-    .s_axi_awaddr_i   (s_axi_awaddr_i),
-    .s_axi_awvalid_i  (s_axi_awvalid_i),
-    .s_axi_awready_o  (s_axi_awready_o),
+    .s_axi_awaddr_i   (s_axi_awaddr),
+    .s_axi_awvalid_i  (s_axi_awvalid),
+    .s_axi_awready_o  (s_axi_awready),
 
-    .s_axi_wdata_i    (s_axi_wdata_i),
-    .s_axi_wstb_i     (s_axi_wstb_i),
-    .s_axi_wvalid_i   (s_axi_wvalid_i),
-    .s_axi_wready_o   (s_axi_wready_o),
+    .s_axi_wdata_i    (s_axi_wdata),
+    .s_axi_wstb_i     (s_axi_wstrb),
+    .s_axi_wvalid_i   (s_axi_wvalid),
+    .s_axi_wready_o   (s_axi_wready),
 
-    .s_axi_bresp_o    (s_axi_bresp_o),
-    .s_axi_bvalid_o   (s_axi_bvalid_o),
-    .s_axi_bready_i   (s_axi_bready_i),
+    .s_axi_bresp_o    (s_axi_bresp),
+    .s_axi_bvalid_o   (s_axi_bvalid),
+    .s_axi_bready_i   (s_axi_bready),
 
-    .s_axi_araddr_i   (s_axi_araddr_i),
-    .s_axi_arvalid_i  (s_axi_arvalid_i),
-    .s_axi_arready_o  (s_axi_arready_o),
+    .s_axi_araddr_i   (s_axi_araddr),
+    .s_axi_arvalid_i  (s_axi_arvalid),
+    .s_axi_arready_o  (s_axi_arready),
 
-    .s_axi_rdata_o    (s_axi_rdata_o),
-    .s_axi_rresp_o    (s_axi_rresp_o),
-    .s_axi_rvalid_o   (s_axi_rvalid_o),
-    .s_axi_rready_i   (s_axi_rready_i),
+    .s_axi_rdata_o    (s_axi_rdata),
+    .s_axi_rresp_o    (s_axi_rresp),
+    .s_axi_rvalid_o   (s_axi_rvalid),
+    .s_axi_rready_i   (s_axi_rready),
 
     // Write interface to core
     .wr_addr_o        (wr_addr),
@@ -119,8 +119,8 @@ module axi_gpio_top #(
     .AXI_DATA_WIDTH (AXI_DATA_WIDTH),
     .GPIO_WIDTH     (GPIO_WIDTH)
   ) u_gpio_core (
-    .clk_i           (s_axi_aclk_i),
-    .reset_n         (s_axi_areset_n),
+    .clk_i           (s_axi_aclk),
+    .reset_n         (s_axi_aresetn),
 
     // Write interface
     .wr_en_i         (wr_en),
@@ -134,7 +134,6 @@ module axi_gpio_top #(
     .rd_err_o        (rd_err),
     .rd_en_i         (rd_en),
     .rd_addr_i       (rd_addr),
-
     // GPIO pins
     .gpio_io         (gpio_io)
   );
