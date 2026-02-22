@@ -145,7 +145,7 @@ module axi_gpio #(
 
   // Next-state logic
   always_comb begin : fsm_read_next_state_logic
-    rd_state_next = 2'bx;
+    //rd_state_next = 2'bx;
 
     case (rd_state)
       RD_IDLE: begin
