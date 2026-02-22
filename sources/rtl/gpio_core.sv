@@ -47,7 +47,7 @@ module axi_gpio #(
   // endgenerate
 
   assign gpio_data_in = gpio_io;
-  // що буде якщо  gpio_size < axi_size?
+  
   always_ff @(posedge clk_i or negedge reset_n) begin : write_logic
     if(!reset_n) begin
       gpio_data <= '0;
