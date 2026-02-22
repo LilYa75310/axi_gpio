@@ -103,7 +103,7 @@ module gpio_core #(
   end
   
   // Counter
-  always_ff @(posedge clk_i or negedge reset_n) begin : fsm_read_state_reg
+  always_ff @(posedge clk_i or negedge reset_n) begin : fsm_counter_delay
     if(!reset_n) begin
       counter <= '0;
     end else begin
