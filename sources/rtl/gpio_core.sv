@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module axi_gpio #(
+module gpio_core #(
   parameter int AXI_ADDR_WIDTH = 32,
   parameter int AXI_DATA_WIDTH = 32,
   parameter int GPIO_WIDTH = 32
@@ -54,7 +54,7 @@ module axi_gpio #(
       gpio_tri <= '1;
     end else begin
       if(wr_en_i) begin
-        case(wr_addr_i[3:0]) begin
+        case(wr_addr_i[3:0])
           4'h0: begin
             for (int i = 0; i < AXI_DATA_WIDTH/8; i++) begin
               if ((i*8) < GPIO_WIDTH) begin
@@ -76,7 +76,7 @@ module axi_gpio #(
           end
 
           default: ;
-        end
+        endcase
       end
     end
   end
@@ -143,7 +143,7 @@ module axi_gpio #(
         if(counter == 2'd1) begin
           rd_state_next = RD_DONE;
         end else begin
-          rd_state_next = BUSY;
+          rd_state_next = RD_BUSY;
         end
       end
 
