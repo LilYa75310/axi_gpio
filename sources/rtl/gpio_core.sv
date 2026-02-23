@@ -32,6 +32,7 @@ module gpio_core #(
   logic [GPIO_WIDTH-1:0]            gpio_data;
   logic [GPIO_WIDTH-1:0]            gpio_data_in;
   logic [AXI_ADDR_WIDTH-1:0]        rd_addr_q;
+  logic [GPIO_WIDTH-1:0]            wr_data_masked;
   // //Channel 2
   // logic [GPIO_WIDTH-1:0]            gpio2_tri;
   // logic [GPIO_WIDTH-1:0]            gpio2_data;
@@ -48,6 +49,8 @@ module gpio_core #(
 
   assign gpio_data_in = gpio_io;
   
+  assign wr_data_masked = wr_data_i[GPIO_WIDTH-1:0];
+
   always_ff @(posedge clk_i or negedge reset_n) begin : write_logic
     if(!reset_n) begin
       gpio_data <= '0;
@@ -56,21 +59,17 @@ module gpio_core #(
       if(wr_en_i) begin
         case(wr_addr_i[3:0])
           4'h0: begin
-            for (int i = 0; i < AXI_DATA_WIDTH/8; i++) begin
-              if ((i*8) < GPIO_WIDTH) begin
-                if(wr_strb_i[i]) begin
-                  gpio_data[i*8 +: 8] <= wr_data_i[i*8 +: 8];
-                end
+            for (int i = 0; i < GPIO_WIDTH; i++) begin
+              if(wr_strb_i[i/8]) begin // or i>>3
+                gpio_data[i] <= wr_data_masked[i];
               end
             end
           end
 
           4'h4: begin
-            for (int i = 0; i < AXI_DATA_WIDTH/8; i++) begin
-              if ((i*8) < GPIO_WIDTH) begin
-                if(wr_strb_i[i]) begin
-                  gpio_tri[i*8 +: 8] <= wr_data_i[i*8 +: 8];
-                end
+            for (int i = 0; i < GPIO_WIDTH; i++) begin
+              if(wr_strb_i[i/8]) begin // or i>>3
+                gpio_tri[i] <= wr_data_masked[i];
               end
             end
           end
@@ -163,7 +162,7 @@ module gpio_core #(
       rd_err_o <= '0;
     end else begin
       rd_done_o <= '0;
-      rd_data_o <= 1'b0;
+      rd_data_o <= '0;
       rd_err_o <= 2'b00;
 
       case (rd_state_next)
@@ -176,13 +175,13 @@ module gpio_core #(
           //case (rd_addr_i[3:0])
           case (rd_addr_q[3:0])
             4'h0: begin
-              rd_data_o <= gpio_data_in;
-              //rd_data_o <= {{(AXI_DATA_WIDTH-GPIO_WIDTH){1'b0}}, gpio_data_in};
+              //rd_data_o <= gpio_data_in;
+              rd_data_o <= {{(AXI_DATA_WIDTH-GPIO_WIDTH){1'b0}}, gpio_data_in};
             end
 
             4'h4: begin
-              rd_data_o <= gpio_tri;
-              //rd_data_o <= {{(AXI_DATA_WIDTH-GPIO_WIDTH){1'b1}}, gpio_tri};
+              //rd_data_o <= gpio_tri;
+              rd_data_o <= {{(AXI_DATA_WIDTH-GPIO_WIDTH){1'b1}}, gpio_tri};
             end
 
             default: begin
