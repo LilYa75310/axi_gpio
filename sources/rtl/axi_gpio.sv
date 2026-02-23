@@ -2,8 +2,7 @@
 
 module axi_gpio #(
   parameter int AXI_ADDR_WIDTH = 32,
-  parameter int AXI_DATA_WIDTH = 32,
-  parameter int GPIO_WIDTH = 32
+  parameter int AXI_DATA_WIDTH = 32
 )(  
   //Global sys signals 
   input  logic                             s_axi_aclk_i,
