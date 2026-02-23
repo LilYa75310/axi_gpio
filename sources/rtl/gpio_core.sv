@@ -162,6 +162,7 @@ module gpio_core #(
       rd_done_o <= '0;
       rd_err_o <= '0;
     end else begin
+      rd_done_o <= '0;
       rd_data_o <= 1'b0;
       rd_err_o <= 2'b00;
 
