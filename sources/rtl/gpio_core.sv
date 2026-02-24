@@ -3,7 +3,7 @@
 module gpio_core #(
   parameter int AXI_ADDR_WIDTH = 32,
   parameter int AXI_DATA_WIDTH = 32,
-  parameter int GPIO_WIDTH = 32
+  parameter int GPIO_WIDTH = 1
 )(  
   //Global sys signals 
   input  logic                             clk_i,
@@ -19,10 +19,14 @@ module gpio_core #(
   output logic [1:0]                       rd_err_o,
   input  logic                             rd_en_i,
   input  logic [AXI_ADDR_WIDTH-1:0]        rd_addr_i,
+  
+  output logic [GPIO_WIDTH-1:0]            gpio_tri_o,
+  output logic [GPIO_WIDTH-1:0]            gpio_data_o,
+  input  logic [GPIO_WIDTH-1:0]            gpio_data_in_i
 
   //GPIO inout pins
   //Channel 1
-  inout  logic [GPIO_WIDTH-1:0]            gpio_io
+  //inout  logic [GPIO_WIDTH-1:0]            gpio_io
   //Channel 2
   //inout  logic [GPIO_WIDTH-1:0]            gpio2_io
 );
@@ -38,7 +42,11 @@ module gpio_core #(
   // logic [GPIO_WIDTH-1:0]            gpio2_data;
 
   //assign gpio_io = gpio_tri ? gpio_data : 'z;
-  assign gpio_io = gpio_tri ? gpio_data : {GPIO_WIDTH{1'bz}};
+  //assign gpio_io = gpio_tri ? gpio_data : {GPIO_WIDTH{1'bz}};
+
+  assign gpio_tri_o = gpio_tri;
+  assign gpio_data_o = gpio_data;
+  assign gpio_data_in = gpio_data_in_i;
 
   // genvar i;
   // generate
@@ -47,9 +55,9 @@ module gpio_core #(
   //   end
   // endgenerate
 
-  assign gpio_data_in = gpio_io;
+  //assign gpio_data_in = gpio_io;
   
-  assign wr_data_masked = wr_data_i[GPIO_WIDTH-1:0];
+   assign wr_data_masked = wr_data_i[GPIO_WIDTH-1:0];
 
   always_ff @(posedge clk_i or negedge reset_n) begin : write_logic
     if(!reset_n) begin
@@ -162,7 +170,7 @@ module gpio_core #(
       rd_err_o <= '0;
     end else begin
       rd_done_o <= '0;
-      rd_data_o <= '0;
+      rd_data_o <= 1'b0;
       rd_err_o <= 2'b00;
 
       case (rd_state_next)

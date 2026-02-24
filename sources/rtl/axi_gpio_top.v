@@ -3,7 +3,7 @@
 module axi_gpio_top #(
   parameter integer AXI_ADDR_WIDTH = 32,
   parameter integer AXI_DATA_WIDTH = 32,
-  parameter integer GPIO_WIDTH     = 32
+  parameter integer GPIO_WIDTH     = 1
 )(
   // ======================================
   // AXI-Lite Interface
@@ -11,50 +11,48 @@ module axi_gpio_top #(
   input  wire                         s_axi_aclk,
   input  wire                         s_axi_aresetn,
 
-  // Write address channel
   input  wire [AXI_ADDR_WIDTH-1:0]    s_axi_awaddr,
   input  wire                         s_axi_awvalid,
   output wire                         s_axi_awready,
 
-  // Write data channel
   input  wire [AXI_DATA_WIDTH-1:0]    s_axi_wdata,
   input  wire [AXI_DATA_WIDTH/8-1:0]  s_axi_wstrb,
   input  wire                         s_axi_wvalid,
   output wire                         s_axi_wready,
 
-  // Write response channel
   output wire [1:0]                   s_axi_bresp,
   output wire                         s_axi_bvalid,
   input  wire                         s_axi_bready,
 
-  // Read address channel
   input  wire [AXI_ADDR_WIDTH-1:0]    s_axi_araddr,
   input  wire                         s_axi_arvalid,
   output wire                         s_axi_arready,
 
-  // Read data channel
   output wire [AXI_DATA_WIDTH-1:0]    s_axi_rdata,
   output wire [1:0]                   s_axi_rresp,
   output wire                         s_axi_rvalid,
   input  wire                         s_axi_rready,
 
-  // ======================================
-  // GPIO pins
-  // ======================================
-  inout  wire [GPIO_WIDTH-1:0]        gpio_io
+  //inout  wire [GPIO_WIDTH-1:0]        gpio_io
+  output wire [GPIO_WIDTH-1:0] gpio_data,
+  output wire [GPIO_WIDTH-1:0] gpio_tri,
+  input  wire [GPIO_WIDTH-1:0] gpio_data_in
 );
 
+  
+
+  // assign gpio_io = gpio_tri ? gpio_data : {GPIO_WIDTH{1'bz}};
+  // assign gpio_data_in = gpio_io;
+
   // ======================================
-  // Internal interconnect signals
+  // AXI → core signals
   // ======================================
 
-  // Write side
   wire [AXI_ADDR_WIDTH-1:0]   wr_addr;
   wire [AXI_DATA_WIDTH-1:0]   wr_data;
   wire [AXI_DATA_WIDTH/8-1:0] wr_strb;
   wire                        wr_en;
 
-  // Read side
   wire                        rd_en;
   wire [AXI_ADDR_WIDTH-1:0]   rd_addr;
   wire                        rd_done;
@@ -62,15 +60,10 @@ module axi_gpio_top #(
   wire [1:0]                  rd_err;
 
   // ======================================
-  // AXI GPIO Slave
+  // AXI Slave
   // ======================================
 
-  axi_gpio #(
-    .AXI_ADDR_WIDTH (AXI_ADDR_WIDTH),
-    .AXI_DATA_WIDTH (AXI_DATA_WIDTH),
-    .GPIO_WIDTH     (GPIO_WIDTH)
-  ) u_axi_gpio (
-    // AXI
+  axi_gpio u_axi_gpio (
     .s_axi_aclk_i     (s_axi_aclk),
     .s_axi_areset_n   (s_axi_aresetn),
 
@@ -96,13 +89,11 @@ module axi_gpio_top #(
     .s_axi_rvalid_o   (s_axi_rvalid),
     .s_axi_rready_i   (s_axi_rready),
 
-    // Write interface to core
     .wr_addr_o        (wr_addr),
     .wr_data_o        (wr_data),
     .wr_strb_o        (wr_strb),
     .wr_en_o          (wr_en),
 
-    // Read interface to core
     .rd_done_i        (rd_done),
     .rd_data_i        (rd_data),
     .rd_err_i         (rd_err),
@@ -114,28 +105,26 @@ module axi_gpio_top #(
   // GPIO Core
   // ======================================
 
-  gpio_core #(
-    .AXI_ADDR_WIDTH (AXI_ADDR_WIDTH),
-    .AXI_DATA_WIDTH (AXI_DATA_WIDTH),
-    .GPIO_WIDTH     (GPIO_WIDTH)
-  ) u_gpio_core (
-    .clk_i           (s_axi_aclk),
-    .reset_n         (s_axi_aresetn),
+  gpio_core u_gpio_core (
+    .clk_i            (s_axi_aclk),
+    .reset_n          (s_axi_aresetn),
 
-    // Write interface
-    .wr_en_i         (wr_en),
-    .wr_addr_i       (wr_addr),
-    .wr_strb_i       (wr_strb),
-    .wr_data_i       (wr_data),
+    .wr_en_i          (wr_en),
+    .wr_addr_i        (wr_addr),
+    .wr_strb_i        (wr_strb),
+    .wr_data_i        (wr_data),
 
-    // Read interface
-    .rd_done_o       (rd_done),
-    .rd_data_o       (rd_data),
-    .rd_err_o        (rd_err),
-    .rd_en_i         (rd_en),
-    .rd_addr_i       (rd_addr),
-    // GPIO pins
-    .gpio_io         (gpio_io)
+    .rd_done_o        (rd_done),
+    .rd_data_o        (rd_data),
+    .rd_err_o         (rd_err),
+    .rd_en_i          (rd_en),
+    .rd_addr_i        (rd_addr),
+
+    .gpio_tri_o       (gpio_tri),
+    .gpio_data_o      (gpio_data),
+    .gpio_data_in_i   (gpio_data_in)
   );
+
+
 
 endmodule
